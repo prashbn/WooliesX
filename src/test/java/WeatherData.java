@@ -23,7 +23,7 @@ public class WeatherData {
     }
 
     public String toString() {
-        return String.format("%s\t%s\t%f\t%f", postCode, temp, uv, windspd);
+        return String.format("%s\t%s\t%s\t%f\t%f", postCode,dayOfWeek, temp, uv, windspd);
 
     }
 }

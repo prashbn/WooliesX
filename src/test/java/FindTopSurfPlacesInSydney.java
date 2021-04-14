@@ -44,10 +44,14 @@ public class FindTopSurfPlacesInSydney {
         //Add all the area codes
         areaCodes.put(2026, "bondi");
         areaCodes.put(2096, "freshwater");
+        areaCodes.put(2024, "bronte");
+        areaCodes.put(2095, "manly");
         for (HashMap.Entry<Integer, String> entry : areaCodes.entrySet()) {
             Response response = doGetRequest(entry.getKey(), apiKey);
             responseFilter(response, entry.getKey().toString());
         }
+
+        //Find the best place to surf here
         sortAndPrint();
     }
 
@@ -104,6 +108,8 @@ public class FindTopSurfPlacesInSydney {
         }
         return jsonObject;
     }
+
+
 
     public void sortAndPrint() {
         Collections.sort(listweatherData, new PostCodeChainedComparator(
