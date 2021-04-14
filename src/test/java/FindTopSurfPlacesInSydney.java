@@ -10,6 +10,7 @@ import org.testng.annotations.Test;
 import org.testng.log4testng.Logger;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -45,7 +46,7 @@ public class FindTopSurfPlacesInSydney {
         areaCodes.put(2096, "freshwater");
         for (HashMap.Entry<Integer, String> entry : areaCodes.entrySet()) {
             Response response = doGetRequest(entry.getKey(), apiKey);
-            responseFilter(response, areaCodes.entrySet().toString());
+            responseFilter(response, entry.getKey().toString());
         }
         sortAndPrint();
     }
@@ -70,17 +71,36 @@ public class FindTopSurfPlacesInSydney {
     }
 
     public JSONObject responseFilter(Response response, String postCode) {
+        LocalDate processingDate = null;
         JSONObject jsonObject = new JSONObject(response.getBody().asString());
 
         for (int i = 0; i < ((JSONArray) jsonObject.get("data")).length(); i++) {
 
-            String temp = ((JSONObject) ((JSONArray) jsonObject.get("data")).get(0)).get("temp").toString();
-            BigDecimal uv = (BigDecimal) ((JSONObject) ((JSONArray) jsonObject.get("data")).get(0)).get("uv");
-            Float fuv = uv.floatValue();
-            BigDecimal wind_spd = (BigDecimal) ((JSONObject) ((JSONArray) jsonObject.get("data")).get(0)).get("wind_spd");
-            Float fwind_spd = wind_spd.floatValue();
-            listweatherData.add(new WeatherData(postCode, temp, fuv, fwind_spd));
+            //Implement to extract days which matches monday and tuesday
 
+            String date_time = ((JSONObject) ((JSONArray) jsonObject.get("data")).get(i)).get("datetime").toString();
+            try {
+                processingDate = LocalDate.parse(date_time);
+
+            } catch (Exception e) {
+                //Handle exception here
+
+            }
+
+            //Check the temperature criteria
+            Float max_temp = Float.valueOf(((JSONObject) ((JSONArray) jsonObject.get("data")).get(i)).get("max_temp").toString());
+            Float min_temp = Float.valueOf(((JSONObject) ((JSONArray) jsonObject.get("data")).get(i)).get("min_temp").toString());
+
+            if (min_temp >= 12 && max_temp <= 30)
+                if (processingDate.getDayOfWeek().toString().equals("MONDAY") || processingDate.getDayOfWeek().toString().equals("FRIDAY")) {
+
+                    String temp = ((JSONObject) ((JSONArray) jsonObject.get("data")).get(i)).get("temp").toString();
+                    BigDecimal uv = (BigDecimal) ((JSONObject) ((JSONArray) jsonObject.get("data")).get(i)).get("uv");
+                    Float fuv = uv.floatValue();
+                    BigDecimal wind_spd = (BigDecimal) ((JSONObject) ((JSONArray) jsonObject.get("data")).get(i)).get("wind_spd");
+                    Float fwind_spd = wind_spd.floatValue();
+                    listweatherData.add(new WeatherData(postCode, processingDate.getDayOfWeek().toString(), temp, fuv, fwind_spd));
+                }
         }
         return jsonObject;
     }
@@ -91,7 +111,7 @@ public class FindTopSurfPlacesInSydney {
                 new WindSpeedComparator())
         );
 
-        System.out.println("\n*** After sorting:");
+        System.out.println("\n*** After sorting:" + "\n POST CODE, DAY, UV INDEX, WIND ");
 
         for (WeatherData wd : listweatherData) {
             System.out.println(wd);

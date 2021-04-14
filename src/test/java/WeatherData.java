@@ -1,11 +1,13 @@
 public class WeatherData {
     private String postCode;
+    private String dayOfWeek;
     private String temp;
     private Float uv;
     private Float windspd;
 
-    public WeatherData(String postCode, String temp, Float uv, Float windspd) {
+    public WeatherData(String postCode,String dayOfWeek, String temp, Float uv, Float windspd) {
         this.postCode = postCode;
+        this.dayOfWeek=dayOfWeek;
         this.temp = temp;
         this.uv = uv;
         this.windspd = windspd;
@@ -22,5 +24,6 @@ public class WeatherData {
 
     public String toString() {
         return String.format("%s\t%s\t%f\t%f", postCode, temp, uv, windspd);
+
     }
 }
